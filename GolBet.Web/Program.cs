@@ -1,4 +1,6 @@
+using GolBet.Repositories;
 using GolBet.Repositories.Data;
+using GolBet.Repositories.Seeding;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,7 +14,18 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
            .UseSnakeCaseNamingConvention());
 
+// Registro genérico abierto: cualquier IGenericRepository<T> se resuelve con GenericRepository<T>.
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IMatchRepository, MatchRepository>();
+
 var app = builder.Build();
+
+// Aplica migraciones pendientes y siembra datos solo si la BD está vacía.
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await DbSeeder.SeedAsync(context);
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
