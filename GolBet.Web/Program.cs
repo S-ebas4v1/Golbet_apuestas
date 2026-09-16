@@ -1,6 +1,8 @@
 using GolBet.Repositories;
 using GolBet.Repositories.Data;
 using GolBet.Repositories.Seeding;
+using GolBet.Services;
+using GolBet.Services.Mapping;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +19,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Registro genérico abierto: cualquier IGenericRepository<T> se resuelve con GenericRepository<T>.
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IMatchRepository, MatchRepository>();
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+builder.Services.AddScoped<IMatchService, MatchService>();
 
 var app = builder.Build();
 

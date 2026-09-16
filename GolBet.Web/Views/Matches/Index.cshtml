@@ -1,0 +1,79 @@
+@using GolBet.Entities.Enums
+@model IEnumerable<GolBet.Services.DTOs.MatchDto>
+
+@{
+    ViewData["Title"] = "Cartelera";
+}
+
+<h1 class="mb-4">⚽ Cartelera de partidos</h1>
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    @foreach (var match in Model)
+    {
+        var (badgeClass, statusLabel) = match.Status switch
+        {
+            MatchStatus.Scheduled => ("bg-secondary", "Programado"),
+            MatchStatus.InProgress => ("bg-warning text-dark", "En Juego"),
+            MatchStatus.Finished => ("bg-success", "Finalizado"),
+            _ => ("bg-secondary", match.Status.ToString())
+        };
+
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge @badgeClass">@statusLabel</span>
+                        <small class="text-muted">@match.Date.ToString("dd/MM/yyyy HH:mm")</small>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center text-center">
+                        <div class="flex-fill">
+                            @if (!string.IsNullOrWhiteSpace(match.HomeTeamCrestUrl))
+                            {
+                                <img src="@match.HomeTeamCrestUrl" alt="@match.HomeTeamName" style="height:48px" />
+                            }
+                            else
+                            {
+                                <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center mx-auto"
+                                     style="width:48px;height:48px;font-weight:bold;">FC</div>
+                            }
+                            <div class="small mt-1">@match.HomeTeamName</div>
+                        </div>
+
+                        <div class="px-2 fw-bold">
+                            @if (match.Status == MatchStatus.Finished)
+                            {
+                                <span>@match.HomeGoals - @match.AwayGoals</span>
+                            }
+                            else
+                            {
+                                <span>vs</span>
+                            }
+                        </div>
+
+                        <div class="flex-fill">
+                            @if (!string.IsNullOrWhiteSpace(match.AwayTeamCrestUrl))
+                            {
+                                <img src="@match.AwayTeamCrestUrl" alt="@match.AwayTeamName" style="height:48px" />
+                            }
+                            else
+                            {
+                                <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center mx-auto"
+                                     style="width:48px;height:48px;font-weight:bold;">FC</div>
+                            }
+                            <div class="small mt-1">@match.AwayTeamName</div>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between text-center small">
+                        <div><div class="fw-bold">1</div>@match.HomeOdds.ToString("0.00")</div>
+                        <div><div class="fw-bold">X</div>@match.DrawOdds.ToString("0.00")</div>
+                        <div><div class="fw-bold">2</div>@match.AwayOdds.ToString("0.00")</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

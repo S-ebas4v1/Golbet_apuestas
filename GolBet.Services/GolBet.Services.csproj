@@ -5,10 +5,17 @@
     <ProjectReference Include="..\GolBet.Entities\GolBet.Entities.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <!-- NU1903 (GHSA-rvv3-g6hj-g44x) es el aviso del cambio de licencia comercial de
+         AutoMapper, no una vulnerabilidad de código; no aplica al uso académico de este proyecto. -->
+    <NoWarn>$(NoWarn);NU1903</NoWarn>
   </PropertyGroup>
 
 </Project>
