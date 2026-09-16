@@ -1,7 +1,16 @@
+using GolBet.Repositories.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// PostgreSQL con nombres de columnas/tablas en snake_case, para que las
+// consultas escritas a mano en DBeaver no tengan que citar identificadores.
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+           .UseSnakeCaseNamingConvention());
 
 var app = builder.Build();
 

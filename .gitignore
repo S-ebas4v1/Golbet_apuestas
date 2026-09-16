@@ -6,6 +6,9 @@
 # dotenv files
 .env
 
+# Contiene la contraseña real de la BD local: nunca se commitea.
+GolBet.Web/appsettings.Development.json
+
 # User-specific files
 *.rsuser
 *.suo
