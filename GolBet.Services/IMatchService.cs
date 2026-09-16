@@ -7,6 +7,6 @@ namespace GolBet.Services
     {
         Task<IEnumerable<MatchDto>> GetBoardAsync(MatchStatus? status = null);
 
-        Task<MatchDto?> GetByIdAsync(int id);
+        Task<MatchDetailDto?> GetByIdAsync(int id);
     }
 }

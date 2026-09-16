@@ -26,10 +26,10 @@ namespace GolBet.Services
             return _mapper.Map<IEnumerable<MatchDto>>(matches);
         }
 
-        public async Task<MatchDto?> GetByIdAsync(int id)
+        public async Task<MatchDetailDto?> GetByIdAsync(int id)
         {
             var match = await _matchRepository.GetByIdWithDetailsAsync(id);
-            return match is null ? null : _mapper.Map<MatchDto>(match);
+            return match is null ? null : _mapper.Map<MatchDetailDto>(match);
         }
     }
 }

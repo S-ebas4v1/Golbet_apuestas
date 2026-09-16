@@ -1,0 +1,92 @@
+@using GolBet.Entities.Enums
+@model GolBet.Services.DTOs.MatchDetailDto
+
+@{
+    ViewData["Title"] = $"{Model.HomeTeamName} vs {Model.AwayTeamName}";
+
+    var statusLabel = Model.Status switch
+    {
+        MatchStatus.Scheduled => "Programado",
+        MatchStatus.InProgress => "En Juego",
+        MatchStatus.Finished => "Finalizado",
+        _ => Model.Status.ToString()
+    };
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Matches" asp-action="Index">Cartelera</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@Model.HomeTeamName vs @Model.AwayTeamName</li>
+    </ol>
+</nav>
+
+<div class="card shadow-sm">
+    <div class="card-body text-center">
+        <span class="badge bg-secondary mb-3">@statusLabel</span>
+        <p class="text-muted">@Model.Date.ToString("dddd dd 'de' MMMM 'de' yyyy, HH:mm")</p>
+
+        <div class="d-flex justify-content-center align-items-center gap-5 my-4">
+            <div>
+                @if (!string.IsNullOrWhiteSpace(Model.HomeTeamCrestUrl))
+                {
+                    <img src="@Model.HomeTeamCrestUrl" alt="@Model.HomeTeamName" style="height:96px" />
+                }
+                else
+                {
+                    <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center mx-auto"
+                         style="width:96px;height:96px;font-weight:bold;font-size:1.5rem;">FC</div>
+                }
+                <h5 class="mt-2">@Model.HomeTeamName</h5>
+            </div>
+
+            <div class="fs-2 fw-bold">
+                @if (Model.Status == MatchStatus.Finished)
+                {
+                    <span>@Model.HomeGoals - @Model.AwayGoals</span>
+                }
+                else
+                {
+                    <span>vs</span>
+                }
+            </div>
+
+            <div>
+                @if (!string.IsNullOrWhiteSpace(Model.AwayTeamCrestUrl))
+                {
+                    <img src="@Model.AwayTeamCrestUrl" alt="@Model.AwayTeamName" style="height:96px" />
+                }
+                else
+                {
+                    <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center mx-auto"
+                         style="width:96px;height:96px;font-weight:bold;font-size:1.5rem;">FC</div>
+                }
+                <h5 class="mt-2">@Model.AwayTeamName</h5>
+            </div>
+        </div>
+
+        <div class="row text-center mb-4">
+            <div class="col">
+                <div class="fw-bold">Gana Local</div>
+                <div class="fs-5">@Model.HomeOdds.ToString("0.00")</div>
+            </div>
+            <div class="col">
+                <div class="fw-bold">Empate</div>
+                <div class="fs-5">@Model.DrawOdds.ToString("0.00")</div>
+            </div>
+            <div class="col">
+                <div class="fw-bold">Gana Visitante</div>
+                <div class="fs-5">@Model.AwayOdds.ToString("0.00")</div>
+            </div>
+        </div>
+
+        <p class="text-muted">@Model.BetsCount apuesta(s) registrada(s)</p>
+
+        @if (Model.Status == MatchStatus.Scheduled)
+        {
+            <button type="button" class="btn btn-success btn-lg" disabled title="Disponible en el Módulo 8">
+                Apostar (Módulo 8)
+            </button>
+        }
+    </div>
+</div>
