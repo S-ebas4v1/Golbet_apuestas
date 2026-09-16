@@ -34,6 +34,13 @@ namespace GolBet.Repositories.Data
                 .HasIndex(t => t.Name)
                 .IsUnique();
 
+            // Match.Date es la hora local del partido (no un instante UTC). Npgsql exige
+            // Kind=Utc para "timestamp with time zone" (el tipo por defecto), así que se
+            // mapea a "timestamp without time zone" para poder guardar la hora tal cual.
+            modelBuilder.Entity<Match>()
+                .Property(m => m.Date)
+                .HasColumnType("timestamp without time zone");
+
             // El convention discovery de EF no puede resolver dos FKs de Match hacia Team,
             // así que cada relación se declara explícitamente. Restrict evita que borrar un
             // equipo elimine en cascada los partidos donde participó.
