@@ -3,37 +3,16 @@
 Aplicación GolBet — Curso de Desarrollo de Software, .NET 8, arquitectura N-capas
 (`GolBet.Entities`, `GolBet.Repositories`, `GolBet.Services`, `GolBet.Web`).
 
-## Base de datos: PostgreSQL
+## Nota Aclaratoria sobre la Migración del Repositorio
 
-Este proyecto usa **PostgreSQL + Npgsql** (herramienta de administración recomendada:
-DBeaver).
+## Nota para la evaluación:
 
-### Puesta en marcha desde cero
+1. Este proyecto fue desarrollado originalmente en mi cuenta de GitHub inscrita en mi empresa desde el inicio del curso. Debido a problemas de permisos y acceso técnico con los repositorios en dicha cuenta, realicé la migración del repositorio a mi cuenta personal para garantizar su visualización pública y libre acceso para la entrega.
 
-1. Tener PostgreSQL 15+ corriendo localmente.
-2. Editar `db/01_bootstrap.sql` y reemplazar `CAMBIA_ESTA_CLAVE` por una contraseña real.
-3. Ejecutarlo conectado como superusuario `postgres` (en DBeaver, en modo autocommit,
-   sentencia por sentencia). Crea el rol `golbet_app` y la base `golbet`.
-4. Crear `GolBet.Web/appsettings.Development.json` (no está en el repo, cada quien pone
-   la suya) con la misma contraseña:
-   ```json
-   {
-     "ConnectionStrings": {
-       "DefaultConnection": "Host=localhost;Port=5432;Database=golbet;Username=golbet_app;Password=TU_CLAVE"
-     }
-   }
-   ```
-5. Ejecutar la aplicación (`dotnet run` desde `GolBet.Web`, o F5). Al arrancar aplica las
-   migraciones pendientes y siembra 8 equipos y 6 partidos si la base está vacía (no
-   duplica en arranques posteriores).
+## Detalles del procedimiento técnico de migración:
 
-### Reiniciar desde cero
+1. Para preservar la integridad del historial progresivo de commits, la estructura de ramas y las etiquetas (tags de los módulos 1 al 5), la migración se realizó mediante una clonación completa con el historial original intacto.
 
-Borra la base `golbet` (en DBeaver o con `DROP DATABASE`), vuelve a correr
-`db/01_bootstrap.sql` y arranca la aplicación de nuevo.
+2. Se utilizó un Personal Access Token (Classic) para vincular de manera segura los permisos de lectura/escritura entre ambas cuentas.
 
-## Compilar
-
-```
-dotnet build GolBet.sln
-```
+3. El proceso se apoyó en la herramienta Claude Code como asistente CLI para auditar los comandos Git, asegurando que no se perdiera la cronología del proyecto ni se sobrescribieran commits previos.
