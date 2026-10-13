@@ -1,16 +1,21 @@
 using GolBet.Entities.Enums;
 using GolBet.Services;
+using GolBet.Services.DTOs;
+using GolBet.Services.Exceptions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GolBet.Web.Controllers
 {
     public class MatchesController : Controller
     {
         private readonly IMatchService _matchService;
+        private readonly ITeamService _teamService;
 
-        public MatchesController(IMatchService matchService)
+        public MatchesController(IMatchService matchService, ITeamService teamService)
         {
             _matchService = matchService;
+            _teamService = teamService;
         }
 
         public async Task<IActionResult> Index(MatchStatus? status)
@@ -27,6 +32,86 @@ namespace GolBet.Web.Controllers
                 return NotFound();
 
             return View(match);
+        }
+
+        public async Task<IActionResult> Create()
+        {
+            await LoadTeamsAsync();
+            return View(new MatchFormDto());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(MatchFormDto dto)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await _matchService.CreateAsync(dto);
+                    TempData["Success"] = "Partido creado.";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (BusinessRuleException ex)
+                {
+                    ModelState.AddModelError(string.Empty, ex.Message);
+                }
+            }
+
+            await LoadTeamsAsync();
+            return View(dto);
+        }
+
+        public async Task<IActionResult> Edit(int id)
+        {
+            var dto = await _matchService.GetForEditAsync(id);
+            if (dto is null)
+                return NotFound();
+
+            await LoadTeamsAsync();
+            return View(dto);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(MatchFormDto dto)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await _matchService.UpdateAsync(dto);
+                    TempData["Success"] = "Partido actualizado.";
+                    return RedirectToAction(nameof(Detail), new { id = dto.Id });
+                }
+                catch (KeyNotFoundException)
+                {
+                    return NotFound();
+                }
+                catch (BusinessRuleException ex)
+                {
+                    ModelState.AddModelError(string.Empty, ex.Message);
+                }
+            }
+
+            await LoadTeamsAsync();
+            return View(dto);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Deactivate(int id)
+        {
+            await _matchService.DeactivateAsync(id);
+            TempData["Success"] = "Partido desactivado.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // Los combos de equipos solo ofrecen equipos activos.
+        private async Task LoadTeamsAsync()
+        {
+            var teams = await _teamService.GetAllAsync();
+            ViewBag.Teams = new SelectList(teams, nameof(TeamDto.Id), nameof(TeamDto.Name));
         }
     }
 }

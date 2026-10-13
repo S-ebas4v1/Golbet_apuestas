@@ -8,7 +8,10 @@
     string FilterClass(MatchStatus? value) => currentStatus == value ? "btn-success" : "btn-outline-success";
 }
 
-<h1 class="mb-3">⚽ Cartelera de partidos</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>⚽ Cartelera de partidos</h1>
+    <a class="btn btn-success" asp-action="Create">+ Nuevo partido</a>
+</div>
 
 <div class="btn-group mb-4" role="group">
     <a class="btn @FilterClass(null)" asp-action="Index">Todos</a>
@@ -16,6 +19,11 @@
     <a class="btn @FilterClass(MatchStatus.InProgress)" asp-action="Index" asp-route-status="InProgress">En Juego</a>
     <a class="btn @FilterClass(MatchStatus.Finished)" asp-action="Index" asp-route-status="Finished">Finalizados</a>
 </div>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No hay partidos para este filtro.</p>
+}
 
 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
     @foreach (var match in Model)

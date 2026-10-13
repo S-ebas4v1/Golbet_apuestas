@@ -4,6 +4,15 @@ using GolBet.Repositories.Seeding;
 using GolBet.Services;
 using GolBet.Services.Mapping;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
+
+// Fechas y textos en español de Colombia, pero con punto decimal: los <input type="number">
+// envían "2.50" y con la coma de es-CO el model binder leería 250 en las cuotas.
+var culture = (CultureInfo)CultureInfo.GetCultureInfo("es-CO").Clone();
+culture.NumberFormat.NumberDecimalSeparator = ".";
+culture.NumberFormat.NumberGroupSeparator = ",";
+CultureInfo.DefaultThreadCurrentCulture = culture;
+CultureInfo.DefaultThreadCurrentUICulture = culture;
 
 var builder = WebApplication.CreateBuilder(args);
 
