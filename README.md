@@ -39,3 +39,16 @@ Este proyecto fue desarrollado originalmente en mi cuenta de GitHub inscrita en 
 | 4 | `modulo-4` | Servicios, DTOs, AutoMapper y cartelera |
 | 5 | `modulo-5` | Filtros por estado, detalle de partido y 404 |
 | 6 | `modulo-6` | CRUD de equipos y partidos: validación, PRG, baja lógica y reglas de negocio |
+| 7 | `modulo-7` | ASP.NET Core Identity: registro, login/logout, roles Admin/Apostador y autorización |
+
+### Cuentas de demostración (Módulo 7)
+
+El seeder las crea al arrancar la app si no existen:
+
+| Rol | Correo | Contraseña |
+|---|---|---|
+| Admin | `admin@golbet.com` | `Admin123*` |
+| Apostador | `apostador@golbet.com` | `Apostador123*` |
+
+Todo usuario que se registra queda con rol **Apostador** y recibe 100,000 FutCoins de bienvenida.
+Solo el **Admin** puede crear, editar o desactivar equipos y partidos.

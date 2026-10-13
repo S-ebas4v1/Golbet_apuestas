@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- Solo los tipos base de Identity (IdentityUser); nada de EF ni de ASP.NET en esta capa. -->
+    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.11" />
+  </ItemGroup>
+
 </Project>

@@ -1,18 +1,36 @@
 using GolBet.Entities;
 using GolBet.Entities.Enums;
 using GolBet.Repositories.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace GolBet.Repositories.Seeding
 {
     public static class DbSeeder
     {
-        // Idempotente: si ya hay equipos, se asume que la BD ya fue sembrada.
+        // Cuentas de demostración para revisar la app sin registrarse (ver README).
+        public const string AdminEmail = "admin@golbet.com";
+        public const string AdminPassword = "Admin123*";
+        public const string BettorEmail = "apostador@golbet.com";
+        public const string BettorPassword = "Apostador123*";
+
+        public const decimal WelcomeBalance = 100_000m;
+
+        // Idempotente: cada bloque revisa si sus datos ya existen antes de insertarlos.
         // Así correr la app varias veces nunca duplica datos.
-        public static async Task SeedAsync(AppDbContext context)
+        public static async Task SeedAsync(
+            AppDbContext context,
+            RoleManager<IdentityRole> roleManager,
+            UserManager<AppUser> userManager)
         {
             await context.Database.MigrateAsync();
 
+            await SeedDomainAsync(context);
+            await SeedIdentityAsync(roleManager, userManager);
+        }
+
+        private static async Task SeedDomainAsync(AppDbContext context)
+        {
             if (await context.Teams.AnyAsync())
                 return;
 
@@ -45,6 +63,46 @@ namespace GolBet.Repositories.Seeding
 
             await context.Matches.AddRangeAsync(matches);
             await context.SaveChangesAsync();
+        }
+
+        private static async Task SeedIdentityAsync(
+            RoleManager<IdentityRole> roleManager,
+            UserManager<AppUser> userManager)
+        {
+            foreach (var role in new[] { Roles.Admin, Roles.Bettor })
+            {
+                if (!await roleManager.RoleExistsAsync(role))
+                    await roleManager.CreateAsync(new IdentityRole(role));
+            }
+
+            // El administrador gestiona la cartelera, no apuesta: arranca sin saldo.
+            await EnsureUserAsync(userManager, AdminEmail, AdminPassword, "Administrador GolBet", 0m, Roles.Admin);
+            await EnsureUserAsync(userManager, BettorEmail, BettorPassword, "Apostador Demo", WelcomeBalance, Roles.Bettor);
+        }
+
+        private static async Task EnsureUserAsync(
+            UserManager<AppUser> userManager,
+            string email, string password, string fullName, decimal balance, string role)
+        {
+            if (await userManager.FindByEmailAsync(email) is not null)
+                return;
+
+            var user = new AppUser
+            {
+                UserName = email,
+                Email = email,
+                EmailConfirmed = true,
+                FullName = fullName,
+                Balance = balance
+            };
+
+            var result = await userManager.CreateAsync(user, password);
+            if (!result.Succeeded)
+                throw new InvalidOperationException(
+                    $"No se pudo crear el usuario {email}: " +
+                    string.Join("; ", result.Errors.Select(e => e.Description)));
+
+            await userManager.AddToRoleAsync(user, role);
         }
     }
 }

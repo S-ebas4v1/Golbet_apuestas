@@ -20,6 +20,8 @@ namespace GolBet.Entities
         public int MatchId { get; set; }
         public Match Match { get; set; } = null!;
 
-        // El Módulo 7 agregará el usuario dueño de la apuesta.
+        // Dueño de la apuesta. FK de tipo string porque la PK de Identity (AspNetUsers) lo es.
+        public string UserId { get; set; } = null!;
+        public AppUser User { get; set; } = null!;
     }
 }

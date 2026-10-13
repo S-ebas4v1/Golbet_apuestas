@@ -1,10 +1,14 @@
 using GolBet.Entities;
 using GolBet.Entities.Common;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace GolBet.Repositories.Data
 {
-    public class AppDbContext : DbContext
+    // IdentityDbContext agrega las tablas de usuarios, roles, claims y logins al mismo
+    // modelo, así una apuesta puede tener FK real hacia su usuario.
+    public class AppDbContext : IdentityDbContext<AppUser>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -15,6 +19,16 @@ namespace GolBet.Repositories.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Identity fija sus tablas en PascalCase ("AspNetUsers") con ToTable explícito, y eso
+            // le gana a UseSnakeCaseNamingConvention. Se renombran para que todo quede en snake_case.
+            modelBuilder.Entity<AppUser>().ToTable("asp_net_users");
+            modelBuilder.Entity<IdentityRole>().ToTable("asp_net_roles");
+            modelBuilder.Entity<IdentityUserRole<string>>().ToTable("asp_net_user_roles");
+            modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("asp_net_user_claims");
+            modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("asp_net_user_logins");
+            modelBuilder.Entity<IdentityUserToken<string>>().ToTable("asp_net_user_tokens");
+            modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("asp_net_role_claims");
 
             // El nombre del equipo debe ser único sin importar mayúsculas/acentos.
             // PostgreSQL no trae una collation "CI_AI" como SQL Server; el equivalente
@@ -61,6 +75,22 @@ namespace GolBet.Repositories.Data
                 .HasOne(b => b.Match)
                 .WithMany(m => m.Bets)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Tampoco se puede borrar un usuario que tenga apuestas: son su historial.
+            modelBuilder.Entity<Bet>()
+                .HasOne(b => b.User)
+                .WithMany(u => u.Bets)
+                .HasForeignKey(b => b.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Un usuario no puede repetir el mismo pronóstico (1, X o 2) en el mismo partido.
+            modelBuilder.Entity<Bet>()
+                .HasIndex(b => new { b.MatchId, b.UserId, b.Pick })
+                .IsUnique();
+
+            modelBuilder.Entity<AppUser>()
+                .Property(u => u.Balance)
+                .HasPrecision(12, 2);
         }
 
         // Estampa CreatedDate/ModifiedDate automáticamente para toda entidad auditable,

@@ -1,10 +1,14 @@
+using GolBet.Entities;
 using GolBet.Services;
 using GolBet.Services.DTOs;
 using GolBet.Services.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GolBet.Web.Controllers
 {
+    // Toda la gestión de equipos es exclusiva del administrador.
+    [Authorize(Roles = Roles.Admin)]
     public class TeamsController : Controller
     {
         private readonly ITeamService _teamService;
