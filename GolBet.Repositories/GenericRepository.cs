@@ -7,23 +7,40 @@ namespace GolBet.Repositories
     public class GenericRepository<T> : IGenericRepository<T> where T : AuditableEntity
     {
         protected readonly AppDbContext Context;
-        private readonly DbSet<T> _dbSet;
+        protected readonly DbSet<T> DbSet;
 
         public GenericRepository(AppDbContext context)
         {
             Context = context;
-            _dbSet = Context.Set<T>();
+            DbSet = Context.Set<T>();
         }
 
-        public async Task<T?> GetByIdAsync(int id) => await _dbSet.FindAsync(id);
+        public async Task<T?> GetByIdAsync(int id) => await DbSet.FindAsync(id);
 
-        public async Task<IEnumerable<T>> GetAllAsync() => await _dbSet.ToListAsync();
+        public async Task<IEnumerable<T>> GetAllAsync(bool includeInactive = false)
+        {
+            IQueryable<T> query = DbSet.AsNoTracking();
 
-        public async Task AddAsync(T entity) => await _dbSet.AddAsync(entity);
+            if (!includeInactive)
+                query = query.Where(e => e.IsActive);
 
-        public void Update(T entity) => _dbSet.Update(entity);
+            return await query.ToListAsync();
+        }
 
-        public void Remove(T entity) => _dbSet.Remove(entity);
+        public async Task AddAsync(T entity) => await DbSet.AddAsync(entity);
+
+        public void Update(T entity) => DbSet.Update(entity);
+
+        public async Task<bool> DeactivateAsync(int id)
+        {
+            var entity = await DbSet.FindAsync(id);
+            if (entity is null)
+                return false;
+
+            // La entidad queda en estado Modified: SaveChangesAsync le estampa ModifiedDate.
+            entity.IsActive = false;
+            return true;
+        }
 
         public async Task<int> SaveChangesAsync() => await Context.SaveChangesAsync();
     }
