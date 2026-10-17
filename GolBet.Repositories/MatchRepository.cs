@@ -28,16 +28,22 @@ namespace GolBet.Repositories
                 // Teams.Name usa la collation no determinística golbet_ci_ai y PostgreSQL no
                 // permite LIKE/ILIKE sobre ella, por eso se compara con la collation "default".
                 // ILIKE ignora mayúsculas; el OR cubre al equipo local y al visitante.
+                // El carácter de escape se indica explícito: sin él, Npgsql genera ESCAPE ''
+                // y la barra invertida de EscapeLikePattern dejaría de funcionar.
                 query = query.Where(m =>
-                    EF.Functions.ILike(EF.Functions.Collate(m.HomeTeam.Name, "default"), pattern) ||
-                    EF.Functions.ILike(EF.Functions.Collate(m.AwayTeam.Name, "default"), pattern));
+                    EF.Functions.ILike(EF.Functions.Collate(m.HomeTeam.Name, "default"), pattern, LikeEscape) ||
+                    EF.Functions.ILike(EF.Functions.Collate(m.AwayTeam.Name, "default"), pattern, LikeEscape));
             }
 
             return await query.OrderBy(m => m.Date).ToListAsync();
         }
 
+        private const string LikeEscape = @"\";
+
         private static string EscapeLikePattern(string text) =>
-            text.Replace(@"\", @"\\").Replace("%", @"\%").Replace("_", @"\_");
+            text.Replace(LikeEscape, LikeEscape + LikeEscape)
+                .Replace("%", LikeEscape + "%")
+                .Replace("_", LikeEscape + "_");
 
         // Un partido desactivado se comporta como inexistente para el público (404).
         public async Task<Match?> GetByIdWithDetailsAsync(int id) =>
