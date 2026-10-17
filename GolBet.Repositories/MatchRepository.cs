@@ -9,7 +9,7 @@ namespace GolBet.Repositories
     {
         public MatchRepository(AppDbContext context) : base(context) { }
 
-        public async Task<IEnumerable<Match>> GetAllWithTeamsAsync(MatchStatus? status = null)
+        public async Task<IEnumerable<Match>> GetAllWithTeamsAsync(MatchStatus? status = null, string? search = null)
         {
             var query = Context.Matches
                 .AsNoTracking()
@@ -20,8 +20,24 @@ namespace GolBet.Repositories
             if (status.HasValue)
                 query = query.Where(m => m.Status == status.Value);
 
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                // % y _ son comodines de LIKE: se escapan para buscarlos como texto literal.
+                var pattern = $"%{EscapeLikePattern(search.Trim())}%";
+
+                // Teams.Name usa la collation no determinística golbet_ci_ai y PostgreSQL no
+                // permite LIKE/ILIKE sobre ella, por eso se compara con la collation "default".
+                // ILIKE ignora mayúsculas; el OR cubre al equipo local y al visitante.
+                query = query.Where(m =>
+                    EF.Functions.ILike(EF.Functions.Collate(m.HomeTeam.Name, "default"), pattern) ||
+                    EF.Functions.ILike(EF.Functions.Collate(m.AwayTeam.Name, "default"), pattern));
+            }
+
             return await query.OrderBy(m => m.Date).ToListAsync();
         }
+
+        private static string EscapeLikePattern(string text) =>
+            text.Replace(@"\", @"\\").Replace("%", @"\%").Replace("_", @"\_");
 
         // Un partido desactivado se comporta como inexistente para el público (404).
         public async Task<Match?> GetByIdWithDetailsAsync(int id) =>
