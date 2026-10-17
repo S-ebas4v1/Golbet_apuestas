@@ -4,6 +4,8 @@
 @{
     ViewData["Title"] = "Cartelera";
     MatchStatus? currentStatus = ViewBag.CurrentStatus;
+    string? currentSearch = ViewBag.CurrentSearch;
+    var hasSearch = !string.IsNullOrEmpty(currentSearch);
 
     string FilterClass(MatchStatus? value) => currentStatus == value ? "btn-success" : "btn-outline-success";
 }
@@ -16,16 +18,49 @@
     }
 </div>
 
+@* GET: el navegador arma /Matches?search=...&status=... y la búsqueda sobrevive a F5 y se puede compartir. *@
+<form asp-action="Index" method="get" class="row g-2 align-items-end mb-3" role="search">
+    <div class="col-sm-8 col-md-6">
+        <label for="search" class="form-label">Buscar por equipo</label>
+        <input type="search" id="search" name="search" value="@currentSearch"
+               class="form-control" placeholder="Ej: nacional" maxlength="80" />
+    </div>
+    @if (currentStatus.HasValue)
+    {
+        @* Conserva el filtro de estado activo al hacer una nueva búsqueda. *@
+        <input type="hidden" name="status" value="@currentStatus" />
+    }
+    <div class="col-auto">
+        <button type="submit" class="btn btn-success">Buscar</button>
+        @if (hasSearch)
+        {
+            <a class="btn btn-outline-secondary" asp-action="Index" asp-route-status="@currentStatus">Limpiar</a>
+        }
+    </div>
+</form>
+
+@* Cada filtro lleva también la búsqueda activa (asp-route-search se omite si está vacía). *@
 <div class="btn-group mb-4" role="group">
-    <a class="btn @FilterClass(null)" asp-action="Index">Todos</a>
-    <a class="btn @FilterClass(MatchStatus.Scheduled)" asp-action="Index" asp-route-status="Scheduled">Programados</a>
-    <a class="btn @FilterClass(MatchStatus.InProgress)" asp-action="Index" asp-route-status="InProgress">En Juego</a>
-    <a class="btn @FilterClass(MatchStatus.Finished)" asp-action="Index" asp-route-status="Finished">Finalizados</a>
+    <a class="btn @FilterClass(null)" asp-action="Index" asp-route-search="@currentSearch">Todos</a>
+    <a class="btn @FilterClass(MatchStatus.Scheduled)" asp-action="Index" asp-route-status="Scheduled" asp-route-search="@currentSearch">Programados</a>
+    <a class="btn @FilterClass(MatchStatus.InProgress)" asp-action="Index" asp-route-status="InProgress" asp-route-search="@currentSearch">En Juego</a>
+    <a class="btn @FilterClass(MatchStatus.Finished)" asp-action="Index" asp-route-status="Finished" asp-route-search="@currentSearch">Finalizados</a>
 </div>
 
 @if (!Model.Any())
 {
-    <p class="text-muted">No hay partidos para este filtro.</p>
+    if (hasSearch)
+    {
+        <div class="text-center py-5">
+            <h2 class="h4">🔍 No hay partidos para el equipo “@currentSearch”.</h2>
+            <p class="text-muted">Revisa el nombre o prueba con otra parte del nombre del equipo.</p>
+            <a class="btn btn-success" asp-action="Index">Volver a la cartelera de partidos</a>
+        </div>
+    }
+    else
+    {
+        <p class="text-muted">No hay partidos para este filtro.</p>
+    }
 }
 
 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">

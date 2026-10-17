@@ -40,6 +40,7 @@ Este proyecto fue desarrollado originalmente en mi cuenta de GitHub inscrita en 
 | 5 | `modulo-5` | Filtros por estado, detalle de partido y 404 |
 | 6 | `modulo-6` | CRUD de equipos y partidos: validación, PRG, baja lógica y reglas de negocio |
 | 7 | `modulo-7` | ASP.NET Core Identity: registro, login/logout, roles Admin/Apostador y autorización |
+| Taller | — | Buscador de partidos por equipo en la cartelera, combinable con el filtro de estado |
 
 ### Cuentas de demostración (Módulo 7)
 

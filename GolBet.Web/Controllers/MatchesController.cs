@@ -20,10 +20,15 @@ namespace GolBet.Web.Controllers
             _teamService = teamService;
         }
 
-        public async Task<IActionResult> Index(MatchStatus? status)
+        // GET /Matches?status=Scheduled&search=nacional — ambos parámetros llegan por model binding.
+        public async Task<IActionResult> Index(MatchStatus? status, string? search)
         {
-            var matches = await _matchService.GetBoardAsync(status);
+            var matches = await _matchService.GetBoardAsync(status, search);
+
+            // La vista los necesita para resaltar el filtro activo, rellenar el campo de búsqueda
+            // y que filtros y buscador se conserven entre sí.
             ViewBag.CurrentStatus = status;
+            ViewBag.CurrentSearch = search?.Trim();
             return View(matches);
         }
 
