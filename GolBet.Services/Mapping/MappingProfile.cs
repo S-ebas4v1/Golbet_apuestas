@@ -20,6 +20,12 @@ namespace GolBet.Services.Mapping
 
             CreateMap<Team, TeamDto>();
 
+            CreateMap<Bet, BetDto>()
+                .ForMember(d => d.HomeTeamName, o => o.MapFrom(s => s.Match.HomeTeam.Name))
+                .ForMember(d => d.AwayTeamName, o => o.MapFrom(s => s.Match.AwayTeam.Name))
+                .ForMember(d => d.MatchDate, o => o.MapFrom(s => s.Match.Date))
+                .ForMember(d => d.PotentialPayout, o => o.MapFrom(s => s.Amount * s.OddsAtPlacement));
+
             // Formulario -> entidad: solo los campos editables. Id, auditoría, IsActive,
             // estado, goles y navegaciones nunca se toman del formulario.
             CreateMap<Team, TeamFormDto>();
