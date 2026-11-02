@@ -84,9 +84,46 @@
 
         @if (Model.Status == MatchStatus.Scheduled)
         {
-            <button type="button" class="btn btn-success btn-lg" disabled title="Disponible en el Módulo 8">
-                Apostar (Módulo 8)
-            </button>
+            if (User.IsInRole(Roles.Bettor))
+            {
+                <hr />
+                <h5 class="mb-3">🎯 Haz tu apuesta</h5>
+
+                @* Cada botón de cuota envía su propio valor de Pick (Home, Draw o Away). *@
+                <form asp-controller="Bets" asp-action="Place" method="post" class="col-md-8 mx-auto">
+                    <input type="hidden" name="MatchId" value="@Model.Id" />
+
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">Monto</span>
+                        <input name="Amount" type="number" min="1" step="1" value="1000" required class="form-control" />
+                        <span class="input-group-text">FutCoins</span>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col">
+                            <button type="submit" name="Pick" value="Home" class="btn btn-outline-success w-100">
+                                1 · @Model.HomeOdds.ToString("0.00")
+                            </button>
+                        </div>
+                        <div class="col">
+                            <button type="submit" name="Pick" value="Draw" class="btn btn-outline-success w-100">
+                                X · @Model.DrawOdds.ToString("0.00")
+                            </button>
+                        </div>
+                        <div class="col">
+                            <button type="submit" name="Pick" value="Away" class="btn btn-outline-success w-100">
+                                2 · @Model.AwayOdds.ToString("0.00")
+                            </button>
+                        </div>
+                    </div>
+                    <small class="text-muted d-block mt-2">Escribe el monto y haz clic en la cuota que quieres apostar.</small>
+                </form>
+            }
+            else if (User.Identity?.IsAuthenticated != true)
+            {
+                <a class="btn btn-success btn-lg" asp-controller="Account" asp-action="Login"
+                   asp-route-returnUrl="@Url.Action("Detail", "Matches", new { id = Model.Id })">Inicia sesión para apostar</a>
+            }
         }
     </div>
 

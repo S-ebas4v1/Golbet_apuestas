@@ -1,0 +1,63 @@
+@using GolBet.Entities.Enums
+@model IEnumerable<GolBet.Services.DTOs.BetDto>
+
+@{
+    ViewData["Title"] = "Mis apuestas";
+}
+
+<h1 class="mb-4">🎟️ Mis apuestas</h1>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <p class="lead text-muted">Aún no has hecho ninguna apuesta.</p>
+        <a class="btn btn-success" asp-controller="Matches" asp-action="Index" asp-route-status="Scheduled">Ver partidos programados</a>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Partido</th>
+                    <th>Fecha</th>
+                    <th>Selección</th>
+                    <th class="text-end">Monto</th>
+                    <th class="text-end">Cuota</th>
+                    <th class="text-end">Ganancia potencial</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var bet in Model)
+                {
+                    var pickLabel = bet.Pick switch
+                    {
+                        BetPick.Home => $"1 · {bet.HomeTeamName}",
+                        BetPick.Draw => "X · Empate",
+                        BetPick.Away => $"2 · {bet.AwayTeamName}",
+                        _ => bet.Pick.ToString()
+                    };
+
+                    var (badgeClass, statusLabel) = bet.Status switch
+                    {
+                        BetStatus.Won => ("bg-success", "Ganada"),
+                        BetStatus.Lost => ("bg-secondary", "Perdida"),
+                        _ => ("bg-warning text-dark", "Pendiente")
+                    };
+
+                    <tr>
+                        <td class="fw-bold">@bet.HomeTeamName vs @bet.AwayTeamName</td>
+                        <td>@bet.MatchDate.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@pickLabel</td>
+                        <td class="text-end">@bet.Amount.ToString("N0")</td>
+                        <td class="text-end">@bet.OddsAtPlacement.ToString("0.00")</td>
+                        <td class="text-end fw-bold">@bet.PotentialPayout.ToString("N0")</td>
+                        <td><span class="badge @badgeClass">@statusLabel</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
