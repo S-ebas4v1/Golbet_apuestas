@@ -14,5 +14,12 @@ namespace GolBet.Repositories
         // El apostador se carga con seguimiento (tracking) en el mismo contexto que la apuesta,
         // así el descuento del saldo y la apuesta nueva se guardan en un solo SaveChanges.
         Task<AppUser?> GetUserForUpdateAsync(string userId);
+
+        // Resolución: las apuestas Pendientes de un partido CON seguimiento y con su usuario,
+        // porque se les va a cambiar el estado y sumar saldo a los ganadores.
+        Task<List<Bet>> GetPendingByMatchAsync(int matchId);
+
+        // ¿Quedan apuestas sin resolver? Impide desactivar un partido con dinero en juego.
+        Task<bool> HasPendingByMatchAsync(int matchId);
     }
 }

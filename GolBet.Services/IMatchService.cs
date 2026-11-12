@@ -16,5 +16,11 @@ namespace GolBet.Services
         Task UpdateAsync(MatchFormDto dto);
 
         Task DeactivateAsync(int id);
+
+        // Máquina de estados: Programado -> En juego (cierra las apuestas).
+        Task StartMatchAsync(int id);
+
+        // En juego -> Finalizado: registra el marcador y resuelve y paga las apuestas.
+        Task<ResolutionSummaryDto> CloseMatchAsync(MatchResultFormDto dto);
     }
 }
