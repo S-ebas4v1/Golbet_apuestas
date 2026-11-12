@@ -42,6 +42,7 @@ Este proyecto fue desarrollado originalmente en mi cuenta de GitHub inscrita en 
 | 7 | `modulo-7` | ASP.NET Core Identity: registro, login/logout, roles Admin/Apostador y autorización |
 | Taller | — | Buscador de partidos por equipo en la cartelera, combinable con el filtro de estado |
 | 8 | `modulo-8` | Apuestas: panel 1-X-2 en el detalle, reglas de negocio (saldo, selección única, cuota congelada) y "Mis apuestas" |
+| 9 | `modulo-9` | Ciclo del partido (Programado → En juego → Finalizado) y resolución automática de apuestas con pago a ganadores en una sola transacción |
 
 ### Cuentas de demostración (Módulo 7)
 

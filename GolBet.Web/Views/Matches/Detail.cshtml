@@ -127,14 +127,28 @@
         }
     </div>
 
-    @if (User.IsInRole(Roles.Admin))
+    @* Máquina de estados visible: cada estado ofrece solo su siguiente acción.
+       Programado -> Editar / Iniciar; En juego -> Cerrar; Finalizado -> nada (estado terminal).
+       El servicio aplica las mismas reglas aunque alguien escriba la URL a mano. *@
+    @if (User.IsInRole(Roles.Admin) && Model.Status != MatchStatus.Finished)
     {
         <div class="card-footer d-flex justify-content-end gap-2">
-            <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@Model.Id">Editar</a>
-            <form asp-action="Deactivate" asp-route-id="@Model.Id" method="post"
-                  onsubmit="return confirm('¿Desactivar este partido? Dejará de verse en la cartelera.');">
-                <button type="submit" class="btn btn-outline-danger">Desactivar</button>
-            </form>
+            @if (Model.Status == MatchStatus.Scheduled)
+            {
+                <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@Model.Id">Editar</a>
+                <form asp-action="Deactivate" asp-route-id="@Model.Id" method="post"
+                      onsubmit="return confirm('¿Desactivar este partido? Dejará de verse en la cartelera.');">
+                    <button type="submit" class="btn btn-outline-danger">Desactivar</button>
+                </form>
+                <form asp-action="Start" asp-route-id="@Model.Id" method="post"
+                      onsubmit="return confirm('¿Iniciar el partido? Las apuestas quedarán cerradas.');">
+                    <button type="submit" class="btn btn-warning">Iniciar partido</button>
+                </form>
+            }
+            else if (Model.Status == MatchStatus.InProgress)
+            {
+                <a class="btn btn-danger" asp-action="Close" asp-route-id="@Model.Id">Cerrar partido</a>
+            }
         </div>
     }
 </div>
